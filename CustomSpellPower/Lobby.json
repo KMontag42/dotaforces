@@ -1,0 +1,33 @@
+{
+	"mainFields": ["Multiplier"], 
+	"fields":
+	{
+		"Multiplier":
+		{
+			"type": "select",
+			"options":
+			[
+				"x3.0",
+				"x1.5",
+				"x2.0",
+				"x2.5",
+				"x4.0",
+				"x5.0"
+			]
+		},
+		"Spec":
+		{
+			"type": "select",
+			"options":
+			[
+				"Spells & Items",
+				"Spells & Items & Heroes",
+				"Items & Heroes",
+				"Spells & Heroes",
+				"Spells",
+				"Items",
+				"Heroes"
+			]
+		}
+	}
+}
