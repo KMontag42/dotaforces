@@ -166,15 +166,18 @@ DF.onGameFrame = function() {
 };
 game.hook("OnGameFrame", DF.onGameFrame);
 
-DF.onLastHit = function(PlayerID, EntKilled, FirstBlood, HeroKill, TowerKill) {
-    server.print(EntKilled);
-    if (EntKilled == DF.centaur_sensai) {
-        var mega_stone_physical = game.createEntity('dota_item_drop');
-        mega_stone_physical.netprops.m_hItem = DF.mega_stone;
-        server.print('yo');
-        server.print(mega_stone_physical);
-        server.print(mega_stone_physical.netprops.m_hItem);
-        dota.findClearSpaceForUnit(mega_stone_physical, DF.centaur_sensai.netprops.m_vecOrigin);
+DF.onLastHit = function(event) {
+    for (property in event) {
+        server.print(property);
+        server.print(event[property]);
     }
+    // if (EntKilled == DF.centaur_sensai) {
+    //     var mega_stone_physical = game.createEntity('dota_item_drop');
+    //     mega_stone_physical.netprops.m_hItem = DF.mega_stone;
+    //     server.print('yo');
+    //     server.print(mega_stone_physical);
+    //     server.print(mega_stone_physical.netprops.m_hItem);
+    //     dota.findClearSpaceForUnit(mega_stone_physical, DF.centaur_sensai.netprops.m_vecOrigin);
+    // }
 };
 game.hookEvent("last_hit", DF.onLastHit, true);
