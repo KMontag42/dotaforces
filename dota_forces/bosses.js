@@ -49,6 +49,7 @@ DF.bosses.centaur_sensei = {
 
 	lastHit : function(killer) {
 		var mega_stone_physical = game.createEntity('dota_item_drop');
+		this.killer = killer;
 		this.readyToDrop = true;
         //dota.findClearSpaceForUnit(mega_stone_physical, this.entity.netprops.m_vecOrigin);
         //mega_stone_physical.netprops.m_hItem = this.itemDrops[0];

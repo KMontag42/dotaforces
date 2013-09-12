@@ -1,5 +1,5 @@
 /*
- * RADIANT HARD CAMP FIRST - [ -1096.3 -4473.1 1164.7 ]
+ * RADIANT HARD CAMP FIRST - [ -1200, -4000, 8 ]
  * ROSHAN PIT
  * 6 oclock     : x=2405, y=-730
  * 8 o'clock    : x=2070, y=-400
@@ -24,12 +24,11 @@ var cvCreepsNoSpawning  = console.findConVar("dota_creeps_no_spawning"),
     cvWaiting           = console.findConVar("dota_wait_for_players_to_load_timeout");
 
 DF.__custom_unit_flag = false;
-
 DF.branch_combo = {};
 DF.initialized = {};
 DF.heroes = [];
 DF.master_ai = {
-    heroClass : 'npc_dota_hero_doom',
+    heroClass : 'npc_dota_hero_doom_bringer',
     hero : [],
     playerID : 1 << 24
 };
@@ -42,6 +41,10 @@ DF.onMapStart = function() {
         boss.initialize();
     });
 
+    DF.bosses.centaur_sensei.spawnXYZ(-1200, -4000, 8);
+    DF.master_ai.hero = dota.createUnit(DF.master_ai.heroClass, dota.TEAM_NEUTRAL);
+    dota.findClearSpaceForUnit(DF.master_ai.hero, 6900, 6400, 12);
+
     dota.removeAll('npc_dota_tower');
     DF.mega_stone = [];
     server.print(DF.mega_stone);
@@ -49,27 +52,24 @@ DF.onMapStart = function() {
 game.hook("OnMapStart", DF.onMapStart);
 
 DF.onUnitPreThink = function(unit) {
-    //temporary until we have our own AI spawner
-    if (unit.getClassname() == "npc_dota_roshan") {
-        dota.remove(unit);
-    }
+
 };
 game.hook("Dota_OnUnitPreThink", DF.onUnitPreThink);
 
 DF.onUnitThink = function(unit) {
     if(DF.bosses.centaur_sensei.readyToDrop) {
-        DF.bosses.centaur_sensei.itemDrops.forEach(function(_item) {
-            server.print(DF.bosses.centaur_sensei.killer);
-            DF.bosses.centaur_sensei.drops.push(
-                dota.createItemDrop(
-                    DF.bosses.centaur_sensei.killer, 
-                    _item,
-                    DF.bosses.centaur_sensei.killer.netprops.m_vecOrigin
-                )
-            );
-        });
-        DF.bosses.centaur_sensei.readyToDrop = false;
+        var roshan = game.findEntityByClassname(-1, "npc_dota_roshan");
+        server.print('droppin bombs nigga');
+        server.print(roshan);
+        server.print(unit.netprops.m_vecOrigin);
+        // DF.bosses.centaur_sensei.itemDrops.forEach(function(_item) {
+            var dropped_item = dota.createItemDrop(roshan, 'item_reaver', -1200, -4000, 8);
+
+            DF.bosses.centaur_sensei.drops.push(dropped_item);
+        // });
+        
         DF.bosses.centaur_sensei.initialize();
+        DF.bosses.centaur_sensei.readyToDrop = false;
     }
 };
 game.hook("Dota_OnUnitThink", DF.onUnitThink);
@@ -94,6 +94,10 @@ DF.onHeroSpawn = function(hero) {
 
         hero.netprops.m_iCurrentLevel = 50;
         hero.netprops.m_iAbilityPoints = 50;
+
+        var reava = dota.createItemDrop(hero, 'item_reaver', -6570, -6100, 12);
+        reava.netprops.m_hItem.keyvalues["bonus_strength"] = 300;
+        reava.netprops.m_hItem.keyvalues["bonus_agility"] = 300;
 
         dota.createItemDrop(hero, 'item_basher', -6570, -6010, 12);
         dota.createItemDrop(hero, 'item_hyperstone', -6570, -6010, 12);
@@ -130,7 +134,7 @@ DF.onGameFrame = function() {
     {
 		cvWaiting.setInt( 8 );
     }
-    cvCreepsNoSpawning.setInt(0);
+    cvCreepsNoSpawning.setInt(1);
 };
 game.hook("OnGameFrame", DF.onGameFrame);
 
@@ -138,8 +142,9 @@ DF.onLastHit = function(event) {
     var unit_killed = game.getEntityByIndex(event.getInt('EntKilled')),
         killer = game.getEntityByIndex(event.getInt("PlayerID"));
     if (unit_killed.netprops.m_vecOrigin == DF.bosses.centaur_sensei.entity.netprops.m_vecOrigin) {
-        DF.bosses.centaur_sensei.killer = killer;
-        DF.bosses.centaur_sensei.lastHit();
+
+        server.print(killer.getClassname());
+        DF.bosses.centaur_sensei.lastHit(killer);
     }
 };
 game.hookEvent("last_hit", DF.onLastHit, true);
