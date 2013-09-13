@@ -42,8 +42,8 @@ DF.onMapStart = function() {
     });
 
     DF.bosses.centaur_sensei.spawnXYZ(-1200, -4000, 8);
-    DF.master_ai.hero = dota.createUnit(DF.master_ai.heroClass, dota.TEAM_NEUTRAL);
-    dota.findClearSpaceForUnit(DF.master_ai.hero, 6900, 6400, 12);
+    // DF.master_ai.hero = dota.createUnit(DF.master_ai.heroClass, dota.TEAM_NEUTRAL);
+    // dota.findClearSpaceForUnit(DF.master_ai.hero, 6900, 6400, 12);
 
     dota.removeAll('npc_dota_tower');
     DF.mega_stone = [];
@@ -52,25 +52,21 @@ DF.onMapStart = function() {
 game.hook("OnMapStart", DF.onMapStart);
 
 DF.onUnitPreThink = function(unit) {
-
-};
-game.hook("Dota_OnUnitPreThink", DF.onUnitPreThink);
-
-DF.onUnitThink = function(unit) {
-    if(DF.bosses.centaur_sensei.readyToDrop) {
-        var roshan = game.findEntityByClassname(-1, "npc_dota_roshan");
-        server.print('droppin bombs nigga');
-        server.print(roshan);
-        server.print(unit.netprops.m_vecOrigin);
+    if(DF.bosses.centaur_sensei.readyToDrop && (unit in DF.initialized)) {
         // DF.bosses.centaur_sensei.itemDrops.forEach(function(_item) {
-            var dropped_item = dota.createItemDrop(roshan, 'item_reaver', -1200, -4000, 8);
-
-            DF.bosses.centaur_sensei.drops.push(dropped_item);
+        var dropped_item = dota.createItemDrop(unit, 'item_reaver', -1200, -4000, 8);
+        server.print(dropped_item);
+        //DF.bosses.centaur_sensei.drops.push(dropped_item);
         // });
         
         DF.bosses.centaur_sensei.initialize();
         DF.bosses.centaur_sensei.readyToDrop = false;
     }
+};
+game.hook("Dota_OnUnitPreThink", DF.onUnitPreThink);
+
+DF.onUnitThink = function(unit) {
+    
 };
 game.hook("Dota_OnUnitThink", DF.onUnitThink);
 
@@ -160,7 +156,7 @@ DF.onUnitParsed = function(unit, keyvalues) {
 game.hook("Dota_OnUnitParsed", DF.onUnitParsed);
 
 DF.onGetAbilityValue = function(entity, abilityName, field, values) {
-    if (DF.bosses.centaur_sensei.drops) {
+    if (DF.bosses.centaur_sensei.drops.length > 0) {
         for (drop in DF.bosses.centaur_sensei.drops) {
             var item = drop.netprops.m_hItem,
                 item_owner = item.netprops.m_hOwnerEntity;

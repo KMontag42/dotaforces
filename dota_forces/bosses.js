@@ -13,7 +13,7 @@ DF.bosses.centaur_sensei = {
 
 	entity	: false,
 	killer : false,
-	drops : false,
+	drops : [],
 
 	abilities : [],
 
