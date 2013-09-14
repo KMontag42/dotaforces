@@ -54,7 +54,7 @@ game.hook("OnMapStart", DF.onMapStart);
 DF.onUnitPreThink = function(unit) {
     if(DF.bosses.centaur_sensei.readyToDrop && (unit in DF.initialized)) {
         // DF.bosses.centaur_sensei.itemDrops.forEach(function(_item) {
-        var dropped_item = dota.createItemDrop(unit, 'item_reaver', -1200, -4000, 8);
+        var dropped_item = dota.createItemDrop(DF.initialized[unit], 'item_reaver', -1200, -4000, 8);
         server.print(dropped_item);
         //DF.bosses.centaur_sensei.drops.push(dropped_item);
         // });
@@ -91,22 +91,18 @@ DF.onHeroSpawn = function(hero) {
         hero.netprops.m_iCurrentLevel = 50;
         hero.netprops.m_iAbilityPoints = 50;
 
-        var reava = dota.createItemDrop(hero, 'item_reaver', -6570, -6100, 12);
-        reava.netprops.m_hItem.keyvalues["bonus_strength"] = 300;
-        reava.netprops.m_hItem.keyvalues["bonus_agility"] = 300;
+        DF.reava = dota.createItemDrop(hero, 'item_reaver', -6570, -6100, 12);
+        DF.reava.netprops.m_hItem.keyvalues["bonus_strength"] = 300;
 
         dota.createItemDrop(hero, 'item_basher', -6570, -6010, 12);
         dota.createItemDrop(hero, 'item_hyperstone', -6570, -6010, 12);
 
-        dota.createItemDrop(hero, 'item_hyperstone', -6570, -6010, 12);
-        dota.createItemDrop(hero, 'item_heart', -6570, -6010, 12);
-        dota.createItemDrop(hero, 'item_heart', -6570, -6010, 12);
         dota.createItemDrop(hero, 'item_greater_crit', -6570, -6010, 12);
         dota.createItemDrop(hero, 'item_greater_crit', -6570, -6010, 12);
         dota.createItemDrop(hero, 'item_greater_crit', -6570, -6010, 12);
         dota.createItemDrop(hero, 'item_greater_crit', -6570, -6010, 12);
 
-        DF.initialized[hero] = true;
+        DF.initialized[hero] = hero;
     }
 };
 game.hook("Dota_OnHeroSpawn", DF.onHeroSpawn);
@@ -170,7 +166,21 @@ DF.onGetAbilityValue = function(entity, abilityName, field, values) {
         server.print(abilityName);
         server.print(entity.netprops.m_hOwnerEntity.getClassname());
         server.print(DF.dick_lick.netprops.m_hItem.netprops.m_hOwnerEntity.getClassname());
-        
+    }
+
+    if (DF.reava) {
+        if (abilityName == 'item_reaver' && field == "bonus_strength") {
+            return [300];
+        }
+        if (abilityName == 'item_reaver' && field == "bonus_agility") {
+            return [300];
+        }
     }
 };
 game.hook("Dota_OnGetAbilityValue", DF.onGetAbilityValue);
+
+DF.onPickupItem = function(hero, item) {
+    // use dota.setPurchaser(item, unit) to make an item owned by the person picking it up
+    // ie when the reaver is picked up you set its purchaser so that they get the stats and shit
+};
+game.hook("Dota_OnPickupItem", DF.onPickupItem);
