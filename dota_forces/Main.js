@@ -79,7 +79,7 @@ game.hook("Dota_OnUnitThink", DF.onUnitThink);
 DF.onHeroSpawn = function(hero) {
     if (!DF.initialized[hero]) {
         var furion_teleport = dota.createAbility(hero, "furion_teleportation"),
-            lone_druid_spirit_bear = dota.createAbility(hero, "lone_druid_spirit_bear"),
+            lone_druid_spirit_bear = dota.createAbility(hero, "luna_lucent_beam"),
             visage_summon_familiars = dota.createAbility(hero, "skeleton_king_reincarnation");
 
         game.hookEnt(furion_teleport, dota.ENT_HOOK_GET_COOLDOWN, function(level){ return 1; });
@@ -99,6 +99,8 @@ DF.onHeroSpawn = function(hero) {
 
         DF.manFury = dota.createItemDrop(hero, 'item_bfury', -6570, -6100, 12);
         DF.manFury.keyvalues['AbilityBehavior'] = 'DOTA_ABILITY_BEHAVIOR_POINT';
+
+        lone_druid_spirit_bear.keyvalues['AbilityBehavior']  = "DOTA_ABILITY_BEHAVIOR_AOE | DOTA_ABILITY_BEHAVIOR_UNIT_TARGET";
 
         dota.createItemDrop(hero, 'item_hyperstone', -6570, -6010, 12);
 
@@ -157,7 +159,7 @@ DF.onUnitParsed = function(unit, keyvalues) {
 game.hook("Dota_OnUnitParsed", DF.onUnitParsed);
 
 DF.onGetAbilityValue = function(entity, abilityName, field, values) {
-    if (DF.bosses.centaur_sensei.drops.length > 0) {
+     if (DF.bosses.centaur_sensei.drops.length > 0) {
         for (drop in DF.bosses.centaur_sensei.drops) {
             var item = drop.netprops.m_hItem,
                 item_owner = item.netprops.m_hOwnerEntity;
@@ -189,6 +191,16 @@ DF.onGetAbilityValue = function(entity, abilityName, field, values) {
             }
         }
     }
+        // "DOTA_ABILITY_BEHAVIOR_AOE | DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+    if(abilityName == "luna_lucent_beam"){
+        if (field == "stun_duration") {
+            return [5, 5, 5, 5];
+        }
+        if (field == "AbilityBehavior") {
+            return ["DOTA_ABILITY_BEHAVIOR_AOE | DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"];
+        }
+    }
+   
 };
 game.hook("Dota_OnGetAbilityValue", DF.onGetAbilityValue);
 
