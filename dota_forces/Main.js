@@ -18,6 +18,7 @@ require('utils.js');
 require('math.js');
 require('bosses.js');
 require('item_combos.js');
+require('spawner.js');
 // </ ORDER FUCKING MATTERS >
 
 var cvCreepsNoSpawning  = console.findConVar("dota_creeps_no_spawning"),
@@ -45,7 +46,12 @@ DF.onMapStart = function() {
     // DF.master_ai.hero = dota.createUnit(DF.master_ai.heroClass, dota.TEAM_NEUTRAL);
     // dota.findClearSpaceForUnit(DF.master_ai.hero, 6900, 6400, 12);
 
+    DF.radiantBaseWaypoint = game.createEntity('info_target');
+    DF.radiantBaseWaypoint.teleport(-5860, -5365, 12)
+
     dota.removeAll('npc_dota_tower');
+    dota.removeAll('npc_dota_building');
+
     DF.mega_stone = [];
     server.print(DF.mega_stone);
 };
@@ -91,10 +97,9 @@ DF.onHeroSpawn = function(hero) {
         hero.netprops.m_iCurrentLevel = 50;
         hero.netprops.m_iAbilityPoints = 50;
 
-        DF.reava = dota.createItemDrop(hero, 'item_reaver', -6570, -6100, 12);
-        DF.reava.netprops.m_hItem.keyvalues["bonus_strength"] = 300;
+        DF.manFury = dota.createItemDrop(hero, 'item_bfury', -6570, -6100, 12);
+        DF.manFury.keyvalues['AbilityBehavior'] = 'DOTA_ABILITY_BEHAVIOR_POINT';
 
-        dota.createItemDrop(hero, 'item_basher', -6570, -6010, 12);
         dota.createItemDrop(hero, 'item_hyperstone', -6570, -6010, 12);
 
         dota.createItemDrop(hero, 'item_greater_crit', -6570, -6010, 12);
@@ -168,12 +173,20 @@ DF.onGetAbilityValue = function(entity, abilityName, field, values) {
         server.print(DF.dick_lick.netprops.m_hItem.netprops.m_hOwnerEntity.getClassname());
     }
 
-    if (DF.reava) {
-        if (abilityName == 'item_reaver' && field == "bonus_strength") {
-            return [300];
-        }
-        if (abilityName == 'item_reaver' && field == "bonus_agility") {
-            return [300];
+    if (DF.manFury) {
+        if (entity == DF.manFury.netprops.m_hItem) {
+            if (field == "bonus_damage") {
+                return [400];
+            }
+            if (field == "cleave_damage_percent") {
+                return [100];
+            }
+            if (field == "cleave_radius") {
+                return [600];
+            }
+            if (field == "bonus_health_regen") {
+                return [20];
+            }
         }
     }
 };
@@ -184,3 +197,10 @@ DF.onPickupItem = function(hero, item) {
     // ie when the reaver is picked up you set its purchaser so that they get the stats and shit
 };
 game.hook("Dota_OnPickupItem", DF.onPickupItem);
+
+DF.onUnitStatesGathered = function(unit) {
+    if (unit.getClassname = "npc_dota_goodguys_fort") {
+        dota.setUnitState(unit, dota.UNIT_STATE_INVULNERABLE, false);
+    }
+};
+game.hook("Dota_OnUnitStatesGathered", DF.onUnitStatesGathered);
