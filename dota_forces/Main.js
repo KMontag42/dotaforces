@@ -216,3 +216,11 @@ DF.onUnitStatesGathered = function(unit) {
     }
 };
 game.hook("Dota_OnUnitStatesGathered", DF.onUnitStatesGathered);
+
+DF.onEntityDestroyed = function() {
+	//if(entity.getClassname() == "dota_temp_tree" ){
+		server.print("tree is down");
+	//}
+};
+
+game.hookEvent("nommed_tree", DF.onEntityDestroyed);

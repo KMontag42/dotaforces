@@ -1,6 +1,7 @@
 var INTERVAL = 30,
     TOTAL_FRAMES = 100,
     curInterval = 0,
+    ProjectileModel = 'ranged_tower_good',
     curFrame = 0;
 
 DF.spawners = {
@@ -8,10 +9,15 @@ DF.spawners = {
 		building : 'npc_dota_badguys_fillers',
 	    spawnList : [{
 	        creep: {
-                className: 'npc_dota_neutral_blue_dragonspawn_overseer',
+                className: 'npc_dota_necronomicon_archer_3',
                 keys: {
+			'Model' : 'models/heroes/warlock/warlock_demon.mdl',
                 	'StatusHealthRegen' : 8,
-                	'ModelScale'   : .45
+                	'ModelScale'  : .8,
+			'AttackRange' : 900,
+			'AttackAcquisitionRange' : 1000,
+			'ProjectileModel' : ProjectileModel,
+			'ProjectileSpeed' : 1500
                 },
                 netprops : {
                 	'm_iMaxHealth' : 500,
