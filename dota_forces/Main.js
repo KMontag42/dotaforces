@@ -13,6 +13,7 @@
 DF = {};
 
 // < ORDER FUCKING MATTERS >
+var _ = require('underscore.js');
 require('timers');
 require('utils.js');
 require('math.js');
@@ -33,6 +34,7 @@ DF.master_ai = {
     hero : [],
     playerID : 1 << 24
 };
+DF.trees = true;
 
 DF.onMapStart = function() {
 
@@ -98,7 +100,6 @@ DF.onHeroSpawn = function(hero) {
         hero.netprops.m_iAbilityPoints = 50;
 
         DF.manFury = dota.createItemDrop(hero, 'item_bfury', -6570, -6100, 12);
-        DF.manFury.keyvalues['AbilityBehavior'] = 'DOTA_ABILITY_BEHAVIOR_POINT';
 
         lone_druid_spirit_bear.keyvalues['AbilityBehavior']  = "DOTA_ABILITY_BEHAVIOR_AOE | DOTA_ABILITY_BEHAVIOR_UNIT_TARGET";
 
@@ -134,6 +135,19 @@ DF.onGameFrame = function() {
 		cvWaiting.setInt( 8 );
     }
     cvCreepsNoSpawning.setInt(1);
+
+    if (DF.trees && game.rules.props.m_nGameState > 3) {
+        server.print(game.rules.props.m_nGameState);
+        dota.destroyTreesAroundPoint({x: 0, y: 0, z: 0}, 10000, true);
+        DF.trees = false;
+    }
+
+    Object.keys(DF.bosses).forEach(function(key) {
+        var boss = DF.bosses[key];
+        if (boss.readyToDrop) {
+            boss.drop = dota.createItemDrop(boss.killer, boss.itemDrop, boss.killer.netprops.m_vecOrigin);
+        }
+    });
 };
 game.hook("OnGameFrame", DF.onGameFrame);
 
@@ -141,7 +155,6 @@ DF.onLastHit = function(event) {
     var unit_killed = game.getEntityByIndex(event.getInt('EntKilled')),
         killer = game.getEntityByIndex(event.getInt("PlayerID"));
     if (unit_killed.netprops.m_vecOrigin == DF.bosses.centaur_sensei.entity.netprops.m_vecOrigin) {
-
         server.print(killer.getClassname());
         DF.bosses.centaur_sensei.lastHit(killer);
     }
@@ -159,17 +172,16 @@ DF.onUnitParsed = function(unit, keyvalues) {
 game.hook("Dota_OnUnitParsed", DF.onUnitParsed);
 
 DF.onGetAbilityValue = function(entity, abilityName, field, values) {
-     if (DF.bosses.centaur_sensei.drops.length > 0) {
-        for (drop in DF.bosses.centaur_sensei.drops) {
-            var item = drop.netprops.m_hItem,
-                item_owner = item.netprops.m_hOwnerEntity;
+     if (DF.bosses.centaur_sensei.drop) {
+        var drop = DF.bosses.centaur_sensei.drop,
+            item = DF.bosses.centaur_sensei.itemDrops[0],
+            item_owner = drop.netprops.m_hItem.netprops.m_hOwnerEntity;
 
             if (entity.netprops.m_hOwnerEntity.getClassname() == item_owner.getClassname()) {
                 if (abilityName == 'item_reaver' && field == "bonus_strength") {
                     return [300];
                 }
             }
-        }
         server.print(abilityName);
         server.print(entity.netprops.m_hOwnerEntity.getClassname());
         server.print(DF.dick_lick.netprops.m_hItem.netprops.m_hOwnerEntity.getClassname());
@@ -178,16 +190,16 @@ DF.onGetAbilityValue = function(entity, abilityName, field, values) {
     if (DF.manFury) {
         if (entity == DF.manFury.netprops.m_hItem) {
             if (field == "bonus_damage") {
-                return [400];
-            }
-            if (field == "cleave_damage_percent") {
-                return [100];
-            }
-            if (field == "cleave_radius") {
                 return [600];
             }
+            if (field == "cleave_damage_percent") {
+                return [150];
+            }
+            if (field == "cleave_radius") {
+                return [1000];
+            }
             if (field == "bonus_health_regen") {
-                return [20];
+                return [200];
             }
         }
     }

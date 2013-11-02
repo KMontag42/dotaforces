@@ -13,13 +13,11 @@ DF.bosses.centaur_sensei = {
 
 	entity	: false,
 	killer : false,
-	drops : [],
+	drop : false,
 
 	abilities : [],
 
-	itemDrops : [
-		'item_reaver'
-	],
+	itemDrop : 'item_reaver',
 
 	readyToDrop : false,
 	hasKV		: false,
@@ -48,11 +46,13 @@ DF.bosses.centaur_sensei = {
 	},
 
 	lastHit : function(killer) {
-		var mega_stone_physical = game.createEntity('dota_item_drop');
-		this.killer = killer;
+		//var mega_stone_physical = dota.createItemDrop(killer, this.itemDrop, killer.netprops.m_vecOrigin);
+		this.killer = DF.extend(killer);
+		server.print(this.killer);
 		this.readyToDrop = true;
-        //dota.findClearSpaceForUnit(mega_stone_physical, this.entity.netprops.m_vecOrigin);
-        //mega_stone_physical.netprops.m_hItem = this.itemDrops[0];
+        // mega_stone_physical.netprops.m_hItem = this.itemDrop;
+		//this.drop = mega_stone_physical;
+        // dota.findClearSpaceForUnit(mega_stone_physical, this.entity.netprops.m_vecOrigin);
         //server.print(mega_stone_physical.netprops.m_vecOrigin);
         //server.print(mega_stone_physical.netprops.m_hItem);
 	},
