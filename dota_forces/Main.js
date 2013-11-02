@@ -13,8 +13,7 @@
 DF = {};
 
 // < ORDER FUCKING MATTERS >
-var _ = require('underscore.js');
-require('timers');
+var timers = require('timers');
 require('utils.js');
 require('math.js');
 require('bosses.js');
@@ -60,16 +59,18 @@ DF.onMapStart = function() {
 game.hook("OnMapStart", DF.onMapStart);
 
 DF.onUnitPreThink = function(unit) {
-    if(DF.bosses.centaur_sensei.readyToDrop && (unit in DF.initialized)) {
-        // DF.bosses.centaur_sensei.itemDrops.forEach(function(_item) {
-        var dropped_item = dota.createItemDrop(DF.initialized[unit], 'item_reaver', -1200, -4000, 8);
-        server.print(dropped_item);
-        //DF.bosses.centaur_sensei.drops.push(dropped_item);
-        // });
-        
-        DF.bosses.centaur_sensei.initialize();
-        DF.bosses.centaur_sensei.readyToDrop = false;
-    }
+
+    Object.keys(DF.bosses).forEach(function(key) {
+        var boss = DF.bosses[key];
+        if (boss.readyToDrop) {
+            server.print(unit in DF.initialized);
+        }
+
+        if (boss.readyToDrop && (unit in DF.initialized)) {
+            dota.createItemDrop(unit, boss.itemDrop, -1200, -4000, 8);
+            boss.readyToDrop = false;
+        }
+    });
 };
 game.hook("Dota_OnUnitPreThink", DF.onUnitPreThink);
 
@@ -141,13 +142,6 @@ DF.onGameFrame = function() {
         dota.destroyTreesAroundPoint({x: 0, y: 0, z: 0}, 10000, true);
         DF.trees = false;
     }
-
-    Object.keys(DF.bosses).forEach(function(key) {
-        var boss = DF.bosses[key];
-        if (boss.readyToDrop) {
-            boss.drop = dota.createItemDrop(boss.killer, boss.itemDrop, boss.killer.netprops.m_vecOrigin);
-        }
-    });
 };
 game.hook("OnGameFrame", DF.onGameFrame);
 
@@ -155,8 +149,10 @@ DF.onLastHit = function(event) {
     var unit_killed = game.getEntityByIndex(event.getInt('EntKilled')),
         killer = game.getEntityByIndex(event.getInt("PlayerID"));
     if (unit_killed.netprops.m_vecOrigin == DF.bosses.centaur_sensei.entity.netprops.m_vecOrigin) {
-        server.print(killer.getClassname());
-        DF.bosses.centaur_sensei.lastHit(killer);
+        server.print(killer);
+        timers.nextFrame(function() {
+            dota.createItemDrop(killer, DF.bosses.centaur_sensei.itemDrop, -1200, -4000, 8);
+        });
     }
 };
 game.hookEvent("last_hit", DF.onLastHit, true);
